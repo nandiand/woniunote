@@ -1,0 +1,78 @@
+<!-- 前端页面开发步骤: 1.ui设计 2.绘制线框图 3.使用html实现线框图 4.填充页面内容 5.微调 -->
+<!-- padding-top:100px子容器被父容器缩进   margin-top:100px子容器主动缩进 -->
+{% extends 'base.html' %}
+{% block content %}
+                <div class="col-sm-9 col-12">
+                    <!--轮播图-->
+                    <div class="col-12" style="padding: 15px 0px"> <!-- col-12代表占满上一级div -->
+                        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                          <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                          </div>
+                          <div class="carousel-inner">
+                            <div class="carousel-item active">
+                              <img src="/img/banner-1.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                              <img src="/img/banner-2.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                              <img src="/img/banner-3.jpg" class="d-block w-100" alt="...">
+                            </div>
+                          </div>
+                          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                          </button>
+                          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                          </button>
+                        </div>
+                    </div>
+
+                    <!--文章板块-->
+
+                    {% for article,nickname in result %}
+                         <div class="col-12 row article-list">
+                            <div class="col-sm-3 col-3 thumb d-none d-sm-block">
+                                <img src="/thumb/{{article.thumbnail}}" width="226" height="136"/>
+                            </div>
+                            <div class="col-sm-9 col-xs-12 detail">
+                            <div class="title"><a href="/article/{{article.articleid}}">{{article.headline}}</a></div>
+                            <div class="info">作者：{{nickname}}&nbsp;&nbsp;&nbsp;类别：{{article_type[article.type | string]}}&nbsp;&nbsp;&nbsp;
+                                日期：{{article.createtime}}&nbsp;&nbsp;&nbsp;阅读：{{article.readcount}}次&nbsp;&nbsp;&nbsp;消耗积分：{{article.credit}}分</div>
+                             <div class="intro">
+                                 {# striptags用于过滤文章中的html标签，truncate(80)表示只截取前八十字作为摘要展示在首页。 #}
+                                 {{article.content | striptags | truncate(60)}}
+                             </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <!--页面跳转-->
+                    <div class="col-12 paginate">        <!-- 如果是第1页，则上一页也是第1页，否则上一页为当前页-1 -->
+                        {% if page==1 %}
+                        <a href="/page/1">上一页</a>          <!-- 根据总页数循环填充页码，并为其添加超链接进行导航 -->
+                        {% else %}
+                        <a href="/page/{{page-1}}">上一页</a>
+                        {% endif %}
+
+                        {% for i in range(total) %}
+                        <a href="/page/{{i+1}}">{{i+1}}</a>
+                        {% endfor %}
+
+                        {% if page==total %}
+                        <a href="/page/{{total}}">下一页</a>
+                        {% else %}
+                        <a href="/page/{{page+1}}">下一页</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# 按需引入side.html,首页需要 #}
+                {% include 'side.html' %}
+
+{% endblock %}

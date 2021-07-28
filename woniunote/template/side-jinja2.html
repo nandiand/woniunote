@@ -1,0 +1,58 @@
+
+                <!--右侧搜索框-->
+                <div class="col-sm-3 col-12" style="border:none;padding-right: 0px;padding-top: 15px">
+                    <div class="col-12 search-bar row">
+                         <div class="col-8">
+                            <input type="text" class="form-control" id="keyword" placeholder="请输入关键字" onkeyup="doSearch(event)"/>
+                         </div>
+                         <div class="col-4" style="text-align:right;">
+                             <button type="button" class="btn btn-primary" onclick="doSearch(null)">搜索</button>
+                         </div>
+                    </div>
+
+                <script type="text/javascript">
+                    function doSearch(e) {
+                        if (e != null && e.keyCode != 13) {
+                            return false;
+                        }   {#绑定回车事件，焦点在输入框时按回车键（代号13）一样执行dosearch#}
+                        var ke ord = $.trim($("#keyword").val());
+                        {# 对用户输入进行校验，不输、输入过长或输入%都不合法，输入%使得模糊查询构建%%%，代表查询全部文章 #}
+                        {# 但是只用输入窗的js校验不够，可以从地址栏输入则跳过js校验，因此后台也需要同步校验 #}
+                        if (keyword.length == 0 || keyword.length > 10 || keyword.indexOf('%')>=0){
+                           bootbox.alert({'title':'错误提示','message':'你搜索的关键字不合法！'});
+                            $("#keyword").focus();
+                            return false;
+                        }
+                        location.href = '/search/1-' + keyword;
+                        }
+                </script>
+
+                    <!--右侧好文展示,,loop.index是jinja2内置（内置才行），获取for循环中的循环变量，作为序号-->
+                    <!--由于该部分在多个页面引用，用后台渲染的方式重复工作，因此利用javascript处理json的方式进行原生代码的前端渲染-->
+                    <!--利用vue进行前端渲染-->
+                    <div class="col-12 side" style="border: solid 2px red;margin: 10px 0px">
+                        <div class="col-12 tip">最新文章</div>
+                        <ul>
+                            {% for row in last %}
+                            <li><a href="/article/{{row.articleid}}">{{loop.index}}.{{row.headline | truncate(13)}}</a> </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-12 side" style="border: solid 2px red;margin: 10px 0px">
+                        <div class="col-12 tip">最多访问</div>
+                        <ul>
+                            {% for row in most %}
+                            <li><a href="/article/{{row.articleid}}">{{loop.index}}.{{row.headline | truncate(13)}}</a> </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-12 side" style="border: solid 2px red;margin: 10px 0px">
+                        <div class="col-12 tip">特别推荐</div>
+                        <ul>
+                            {% for row in recommended %}
+                            <li><a href="/article/{{row.articleid}}">{{loop.index}}.{{row.headline | truncate(13)}}</a> </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+

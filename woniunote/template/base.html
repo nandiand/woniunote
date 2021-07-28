@@ -1,0 +1,218 @@
+<!-- 前端页面开发步骤: 1.ui设计 2.绘制线框图 3.使用html实现线框图 4.填充页面内容 5.微调 -->
+<!-- padding-top:100px子容器被父容器缩进   margin-top:100px子容器主动缩进 -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>FJNOTES</title>
+        <link href="/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="/css/woniunote.css" type="text/css"/>
+        <link href="/icon/bootstrap-icons.css" rel="stylesheet">
+<!--        <link href="/css/open-iconic-bootstrap.css" rel="stylesheet">-->
+        <script src="/js/bootstrap.js"  type="text/javascript"></script>
+        <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+        <script type="text/javascript" src="/js/woniunote.js"></script>
+        <script type="text/javascript" src="/js/bootbox.min.js"></script>
+        <script type="text/javascript" src="/js/vue.js"></script>
+        <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    </head>
+
+    <body>
+    <!-- 头部-->
+    <div class="header">
+        <div class="container" style="height: 80px">
+            <div class="row">
+                <div class="col-5" style="padding-top:10px"><img src="/img/logo.png" width="230"/>></div>
+                <div class="col-7 d-none d-sm-block" style="text-align: right;padding-top:15px">
+                    <h2>以蜗牛之名，行学习之实</h2>
+                </div>
+                <div class="col-7 d-sm-none" style="text-align: right;padding-top:15px">
+                    <h2>技术博客</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="my-menu" >
+        <div class="container" >
+            <nav class="navbar navbar-expand-lg navbar-dark menu-bar" style="background-color: #563d7c">
+                <a class="navbar-brand" href="/">快捷导航</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <div class="navbar-nav">
+                        {% for k,v in article_type.items() %}
+                        <a class="nav-item nav-link" href="/type/{{k}}-1">{{v}}</a>
+                        {% endfor %}
+                    </div>
+                    <div class="navbar-nav m-lg-auto" >
+                        {% if session.get('islogin') == 'true' %}
+                        <a class="nav-item nav-link" href="#">欢迎你：{{session.get('nickname')}}</a>
+                        &nbsp;&nbsp;&nbsp;
+                        {% if session.get('role') == 'admin' %}
+                            <a class="nav-item nav-link" href="/admin">系统管理</a>
+                        {% else %}
+                            <a class="nav-item nav-link" href="/ucenter">用户中心</a>
+                        {% endif %}
+                            <a class="nav-item nav-link" href="/logout">注销</a>
+                        {% else %}
+                        <a class="nav-item nav-link" href="#" onclick="showLogin()">登录</a>
+                        <a class="nav-item nav-link" href="#" onclick="showReg()">注册</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+<!-- 中部-->
+    <div class="container">
+        <div class="row">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- 底部-->
+    <div class="container-fluid footer" >
+        <div class="container" >
+            <div class="row">
+                <div class="col-4 left">
+                    <p>版权所有 XXXXXXXXXXXX</p>
+                    <p>备案号： XXXXXXXXXXXX</p>
+                </div>
+                <div class="col-4 center">
+                    <p>友情链接</p>
+                    <p>
+                        <a href="#" target="_blank">在线课堂</a>&nbsp;&nbsp;&nbsp;
+                        <a href="#" target="_blank">直播课堂</a>&nbsp;&nbsp;&nbsp;
+                        <a href="#" target="_blank">培训中心</a>&nbsp;&nbsp;&nbsp;
+                        <a href="#" target="_blank">设计学院</a>
+                    </p>
+                </div>
+                <div class="col-4 right">
+                    <p>联系我们 楠点点刚刚好</p>
+                    <p>QQ：632619934</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 登录和注册模态框 -->
+    <!-- data-backdrop="static" 表示用户必须要手工关闭模态框才能操作其他页面 -->
+    <div class="modal fade" id="mymodal" data-bs-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <!-- 在模态框内部配置Tab选项卡，用于切换登录和注册窗口 -->
+        <div class="modal-header" id="tabs" style="background-color: #337AB7; height: 50px;width:600;padding: 5px 20px;">
+            <!-- 与登录和注册窗口的ID进行关联 -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li id="login" class="nav-item active">
+                    <a href="#loginpanel" data-bs-toggle="tab" class="nav-link" style="color: midnightblue">登录</a>
+                </li>
+                <li id="reg" class="nav-item">
+                    <a href="#regpanel" data-bs-toggle="tab" class="nav-link" style="color: midnightblue">注册</a>
+                </li>
+                <li id="find" class="nav-item">
+                    <a href="#findpanel" data-bs-toggle="tab" class="nav-link" style="color: midnightblue">找回密码</a>
+                </li>
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" >
+                <span aria-hidden="true"></span>
+            </button>
+        </div>
+
+    <!-- 绘制登录窗口 -->
+        <div class="tab-content">
+            <div class="tab-pane container active" id="loginpanel">
+                <div class="modal-content" style="margin: 20px 0px;">
+                    <div class="modal-body">
+                        <div class="form-group row" style="margin-top: 20px;height: 40px;">
+                            <label for="loginname" class="col-4">&nbsp;&nbsp;登录邮箱：</label>
+                            <input type="text" id="loginname" class="col-7" placeholder="请输入你的邮箱地址"/>
+                        </div>
+                        <div class="form-group row" style="margin-top: 10px;height: 40px;">
+                            <label for="loginpass" class="col-4">&nbsp;&nbsp;登录密码：</label>
+                            <input type="password" id="loginpass" class="col-7" placeholder="请输入你的登录密码"/>
+                        </div>
+                        <div class="form-group row" style="margin-top: 10px;height: 40px;">
+                            <label for="logincode" class="col-4"> &nbsp;&nbsp;图片验证码：</label>
+                            <input type="text" id="logincode" class="col-5" placeholder="请输入右侧的验证码" onkeyup="doLogin(event)"/>
+                            <img src="/vcode" id="loginvcode" class="col-3" style="cursor:pointer;" onclick="this.src='/vcode?'+Math.random()"/>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="doLogin(null)">登录</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 绘制注册窗口 -->
+            <div class="tab-pane container" id="regpanel">
+                <div class="modal-content">
+                    <div class="modal-content" style="margin: 20px 0px;">
+                        <div class="modal-body">
+                            <div class="form-group row" style="margin-top: 20px;height: 40px;">
+                                <label for="regname" class="col-4">&nbsp;&nbsp;注册邮箱：</label>
+                                <input type="text" id="regname" class="col-7" placeholder="请输入你的邮箱地址"/>
+                            </div>
+                            <div class="form-group row" style="margin-top: 10px;height: 40px;">
+                                <label for="regpass" class="col-4">&nbsp;&nbsp;注册密码：</label>
+                                <input type="password" id="regpass" class="col-7" placeholder="请输入你的注册密码"/>
+                            </div>
+                            <div class="form-group row" style="margin-top: 10px;height: 40px;">
+                                <label for="regcode" class="col-4">&nbsp;&nbsp;邮箱验证码：</label>
+                                <input type="text" id="regcode" class="col-4" placeholder="请输入邮箱验证码" onkeyup="doReg(event)"/>
+                                <button type="button" class="btn btn-primary col-3" onclick="doSendMail(this)">发送邮件</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <span>注册时请使用邮箱地址，便于找回密码。&nbsp;&nbsp;</span>
+                            <button type="button" class="btn btn-dark" data-bs-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="doReg(null)">注册</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+               <!-- 绘制找回密码窗口 -->
+            <div class="tab-pane container" id="findpanel">
+                <div class="modal-content">
+                    <div class="modal-content" style="margin: 20px 0px;">
+                        <div class="modal-body">
+                            <div class="form-group row" style="margin-top: 20px;height: 40px;">
+                                <label for="username" class="col-4">&nbsp;&nbsp;注册邮箱：</label>
+                                <input type="text" id="username" class="col-7" placeholder="请输入你的邮箱地址"/>
+                            </div>
+                            <div class="form-group row" style="margin-top: 10px;height: 40px;">
+                                <label for="newpass" class="col-4">&nbsp;&nbsp;新的密码：</label>
+                                <input type="text" id="newpass" class="col-7" placeholder="请输入新的登录密码"/>
+                            </div>
+                            <div class="form-group row" style="margin-top: 10px;height: 40px;">
+                                <label for="findcode" class="col-4">&nbsp;&nbsp;邮箱验证码：</label>
+                                <input type="text" id="findcode" class="col-4" placeholder="请输入邮箱验证码" onkeyup="doReset(event)"/>
+                                <button type="button" class="btn btn-primary col-3" onclick="doSendMail(this)">发送邮件</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <span>请输入注册邮箱地址并重置密码。&nbsp;&nbsp;</span>
+                            <button type="button" class="btn btn-dark" data-bs-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="doReset(null)">重置密码</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+    </body>
+</html>

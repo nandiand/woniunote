@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<script src="/ue/ueditor.config.js"  type="text/javascript"></script>
+<script src="/ue/ueditor.all.min.js"  type="text/javascript"></script>
+<script src="/ue/lang/zh-cn/zh-cn.js"  type="text/javascript"></script>
+
+<script type="text/javascript">
+    var ue =UE.getEditor('content',{
+      initialFrameHeight:400,
+      autoHeightEnabled:true,
+      serverUrl:'/uedit',
+    });
+</script>
+
+<div class="container" style="margin-top: 15px; background-color: white; padding: 20px;">
+    <div class="row form-group">
+        <label for="headline" class="col-1">文章标题</label>
+        <input type="text" class="col-11" id="headline" style="width: 90%;margin-left: 8px"/>
+    </div>
+    <div class="row" >
+        <script id="content" name="content" type="text/plain"
+                style="max-width:98%;move;padding-top:10px;padding-bottom: 5px;"></script>
+    </div>
+
+
+    <div class="container"  style="margin-top: 10px">
+        <div class="row form-group" >
+            <label for="type" class="col-1" style="padding-top: 6px;text-align: right">类型：</label>
+            <select class="form-control" id="type" style="width: 10%">
+                <option value="1">PHP开发</option>
+                <option value="2">Java开发</option>
+                <option value="3">Python开发</option>
+                <option value="4">Web前端</option>
+                <option value="5">测试开发</option>
+                <option value="6">数据科学</option>
+                <option value="7">网络安全</option>
+                <option value="8">蜗牛杂谈</option>
+            </select>
+            <div class="col-1"></div>
+            <label for="credit" class="col-1" style="padding-top: 6px;text-align: right">积分：</label>
+            <select class="form-control " id="credit"style="width: 10%" >
+                <option value="0">免费</option>
+                <option value="1">1分</option>
+                <option value="2">2分</option>
+                <option value="5">5分</option>
+                <option value="10">10分</option>
+                <option value="20">20分</option>
+                <option value="50">50分</option>
+            </select>
+            <div class="col-2"></div>
+            <button class="form-control btn-primary " style="width: 15%;" onclick="doDraft()">保存草稿</button>
+            <div class="col-1"></div>
+            <button class="form-control btn-primary " style="width: 15%" onclick="doPost()">发布文章</button>
+            </div>
+</div>
+</div>
+
+
+<script type="text/javascript">
+    var ARTICLEID =0;  //定义全局变量，临时保存articleid
+    // 用户投稿
+    function doPost() {
+        var headline = $.trim($("#headline").val());
+        var contentPlain = UE.getEditor("content").getContentTxt();
+
+        if (headline.length < 5) {
+            bootbox.alert({title:"错误提示", message:"标题不能少于5个字"});
+            return false;
+        }
+        else if (contentPlain.length < 100) {
+            bootbox.alert({title:"错误提示", message:"内容不能低于100个字"});
+            return false;
+        }
+        // 发送请求时，带上articleid
+        var param = "headline=" + headline;
+            param += "&content=" + encodeURIComponent(UE.getEditor("content").getContent());
+            param += "&type=" + $("#type").val();
+            param += "&credit=" + $("#credit").val();
+            param += "&drafted=0&checked=1&articleid="+ARTICLEID;
+        $.post('/article', param, function (data) {
+            if (data == 'perm-denied') {
+                bootbox.alert({title:"错误提示", message:"权限不足，无法发布文章."});
+            }
+            else if (data == 'post-fail') {
+                bootbox.alert({title:"错误提示", message:"文章发布失败，请联系管理员."});
+            }
+            else if (data.match(/^\d+$/)) {
+                bootbox.alert({title:"信息提示", message:"文章发布成功."});
+                setTimeout(function () {
+                    // 跳转到我的文章页面
+                    location.href = '/article/' + data;
+                }, 1000);
+            }
+            else {
+                bootbox.alert({title:"错误提示", message:"文章发布失败，可能没有权限."});
+            }
+        });
+    }
+
+    // 保存草稿
+    function doDraft() {
+        var headline = $.trim($("#headline").val());
+        var contentPlain = UE.getEditor("content").getContentTxt();
+
+        if (headline.length < 5) {
+            bootbox.alert({title:"错误提示", message:"草稿标题不能少于5个字"});
+            return false;
+        }
+        else if (contentPlain.length < 100) {
+            bootbox.alert({title:"错误提示", message:"内容不能低于10个字"});
+            return false;
+        }
+        // 发送请求时，带上articleid
+        var param = "headline=" + headline;
+            param += "&content=" + encodeURIComponent(UE.getEditor("content").getContent());
+            param += "&type=" + $("#type").val();
+            param += "&credit=" + $("#credit").val();
+            param += "&drafted=1&checked=1&articleid="+ARTICLEID;
+        $.post('/article', param, function (data) {
+            if (data == 'perm-denied') {
+                bootbox.alert({title:"错误提示", message:"权限不足，无法保存草稿."});
+            }
+            else if (data == 'post-fail') {
+                bootbox.alert({title:"错误提示", message:"保存草稿失败，请联系管理员."});
+            }
+            else if (data.match(/^\d+$/)) {
+                bootbox.alert({title:"信息提示", message:"草稿保存成功."});
+                // 保存草稿后不跳转页面，重新为ARTICLEID赋值
+                ARTICLEID = parseInt(data);
+            }
+            else {
+                bootbox.alert({title:"错误提示", message:"保存草稿失败，可能没有权限."});
+            }
+        });
+    }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <div class="carousel-item active">
+      <img src="/img/404.png" class="d-block w-100" alt="...">
+    </div>
+    <script>
+        setTimeout(function(){location.href='/';},3000);   {# 3秒自动跳转 #}
+    </script>
+
+{% endblock %}

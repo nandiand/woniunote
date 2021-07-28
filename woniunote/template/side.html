@@ -1,0 +1,136 @@
+
+                <!--右侧搜索框-->
+                <div class="col-sm-3 col-12" style="border:none;padding-right: 0px;padding-top: 15px">
+                    <div class="col-12 search-bar row">
+                         <div class="col-8" STYLE="padding-top: 6px">
+                            <input type="text" class="form-control" id="keyword" placeholder="请输入关键字" onkeyup="doSearch(event)"/>
+                         </div>
+                         <div class="col-4" style="text-align:right;">
+                             <button type="button" class="btn btn-primary" onclick="doSearch(null)">搜索</button>
+                         </div>
+                    </div>
+
+                <script type="text/javascript">
+                    function doSearch(e) {
+                        if (e != null && e.keyCode != 13) {
+                            return false;
+                        }
+                        {#绑定回车事件，焦点在输入框时按回车键（代号13）一样执行dosearch#}
+
+                        var keyword = $.trim($("#keyword").val());
+
+                        {# 对用户输入进行校验，不输、输入过长或输入%都不合法，输入%使得模糊查询构建%%%，代表查询全部文章 #}
+                        {# 但是只用输入窗的js校验不够，可以从地址栏输入则跳过js校验，因此后台也需要同步校验 #}
+
+                        if (keyword.length == 0 || keyword.length > 10 || keyword.indexOf('%')>=0){
+                           bootbox.alert({'title':'错误提示','message':'你搜索的关键字不合法！'});
+                            $("#keyword").focus();
+                            return false;
+                        }
+                        location.href = '/search/1-' + keyword;
+                        }
+                </script>
+
+                    <!--右侧好文展示,,loop.index是jinja2内置（内置才行），获取for循环中的循环变量，作为序号-->
+                    <!--由于该部分在多个页面引用，用后台渲染的方式重复工作，因此利用javascript处理json的方式进行原生代码的前端渲染-->
+                    <!--或利用vue前端模板引擎，进行前端渲染-->
+                    <div class="col-12 side" >
+                        <div class="col-12 tip">最新文章</div>
+                        <ul id="last">
+                             <li v-for="(article,index) in content">
+                                 <a v-bind:href="'/article/'+article[0]">${index+1}.${article[1].substr(0,16)}...</a>
+                             </li>
+                        </ul>
+                    </div>
+                    <div class="col-12 side" >
+                        <div class="col-12 tip">最多访问</div>
+                        <ul id="most">
+                            <li v-for="(article,index) in content">
+                                 <a v-bind:href="'/article/'+article[0]">${index+1}.${article[1].substr(0,16)}...</a>
+                             </li>
+                        </ul>
+                    </div>
+                    <div class="col-12 side" id="fixedmenu">
+                        <div class="col-12 tip">特别推荐</div>
+                        <ul id="recommended">
+                            <li v-for="(article,index) in content">
+                                 <a v-bind:href="'/article/'+article[0]">${index+1}.${article[1].substr(0,16)}...</a>
+                             </li>
+                        </ul>
+                        <div class="tip" style="background-color: #3276b1; text-align: center; cursor: pointer;" onclick="gotoTop()">回到顶部</div>
+                    </div>
+
+                <script type="text/javascript">
+
+                    {# 使用vue前段模板引擎进行渲染 #}
+                    $(document).ready(function (){
+                        //第一步：发送Ajax请求去访问/recommend接口，获取json
+                        $.get('/recommend',function (data){
+                            //获取响应并动态填充到对应的栏中
+                            var lastData = data[0];
+                            var mostData = data[1];
+                            var recommendData = data[2];
+
+                            var v1 = new Vue({
+                                el: '#last',
+                                data:{content:lastData},
+                                delimiters:['${','}']
+                            });
+
+                            var v2 = new Vue({
+                                el: '#most',
+                                data:{content:mostData},
+                                delimiters:['${','}']
+                            });
+
+                            var v3 = new Vue({
+                                el: '#recommended',
+                                data:{content:recommendData},
+                                delimiters:['${','}']
+                            })
+                        })
+                    });
+
+                    {# 制作特别推荐栏的绝对停靠和快速返回顶部 #}
+                    $(document).ready(function(){
+                        // 利用浏览器的user-agent属性判断浏览器类型
+                        var userAgentInfo = navigator.userAgent.toLowerCase();
+                        var agents = ["android", "iphone", "symbianOS", "windows phone", "ipad", "ipod"];
+                        var flag = true;    // 表示是PC端
+                        for (var v = 0; v < agents.length; v++) {
+                            if (userAgentInfo.indexOf(agents[v]) >= 0) {
+                                flag = false;   // 表示这是移动端
+                                break;
+                            }
+                        }
+
+                        // 是PC端时才进行右侧绝对停靠
+                        if (flag == true) {
+                            var fixedDiv = document.getElementById("fixedmenu");
+                            var H = 0;
+                            var Y = fixedDiv;
+                            while (Y) {
+                                H += Y.offsetTop;
+                                Y = Y.offsetParent;
+                            }
+
+                            window.onscroll = function () {
+                                var s = document.body.scrollTop || document.documentElement.scrollTop;
+                                if (s > H + 550) {
+                                    fixedDiv.style = "position:fixed; top:0; margin-top:0; width: 273px;";
+                                } else {
+                                    fixedDiv.style = "";
+                                }
+                            }
+                        }
+                    });
+                    //快速返回顶部
+                    function gotoTop() {
+                        $('html, body').animate({scrollTop: 0}, 600);
+                        return false;
+                    }
+
+                </script>
+
+                </div>
+
